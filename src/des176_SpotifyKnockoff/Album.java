@@ -8,15 +8,49 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+@Entity
+@Table (name = "album")
 public class Album {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	
+	@Column (name = "album_id")
 	private String albumID;
+	
+	@Column (name = "title")
 	private String title;
+	
+	@Column (name = "release_date")
 	private String releaseDate;
+	
+	@Column (name = "cover_image_path")
 	private String coverImagePath;
+	
+	@Column (name = "recording_company_name")
 	private String recordingCompany;
+	
+	@Column (name = "number_of_tracks")
 	private int numberOfTracks;
+	
+	@Column (name = "PMRC_rating")
 	private String pmrcRating;
+	
+	@Column (name = "length")
 	private double length;
+	
+	@Transient
 	Map<String, Song> albumSongs;
 	
 	 /**
@@ -92,6 +126,10 @@ public class Album {
 			e.printStackTrace();
 		}
 				
+	}
+	
+	public Album () {
+		super();
 	}
 	
     /**
@@ -184,6 +222,85 @@ public class Album {
 			// TODO: handle exception
 		}
 	}
+	
+	/**
+     * Creates a album object using an existing album object
+     * @param album - album object from the database
+     */
+	public static void createAlbum(Album s) {
+		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory("des176_SpotifyKnockoff");
+	
+		EntityManager emanager = emfactory.createEntityManager();
+		
+		emanager.getTransaction().begin();
+		
+		s.setAlbumID(UUID.randomUUID().toString());
+		s.setTitle("This Album is not in the database");
+		s.setReleaseDate("1971-10-08");
+		s.setCoverImagePath("");
+		s.setRecordingCompany("So Done with This records");
+		s.setNumberOfTracks(20);
+		s.setPmrcRating("Mature");
+		s.setLength(10);
+		
+		
+		emanager.persist(s);
+		emanager.getTransaction().commit();
+		
+		emanager.close();
+		emfactory.close();
+	}
+	
+	/**
+     * Updates a album using the album object to find the albumID
+     * @param album - album object from the database
+     */
+	public static void updateAlbum(Album album) {
+		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory("des176_SpotifyKnockoff");
+		
+		EntityManager emanager = emfactory.createEntityManager();
+		
+		emanager.getTransaction().begin();
+		
+		Album s = emanager.find(Album.class, album.getAlbumID());
+		
+		s.setTitle("This album IS in the database");
+		s.setCoverImagePath("/var/www/html/album.mp3");
+		
+		emanager.persist(s);
+		emanager.getTransaction().commit();
+		
+		emanager.close();
+		emfactory.close();
+
+	}
+	
+	/**
+     * Deletes a album using the album object to find the albumID
+     * @param album - album object from the database
+     */
+	public static void deleteAlbum(Album album) {
+		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory("des176_SpotifyKnockoff");
+		
+		EntityManager emanager = emfactory.createEntityManager();
+		
+		try {
+			emanager.getTransaction().begin();
+		
+		Album s = emanager.find(Album.class, album.getAlbumID());
+		
+		emanager.remove(s);
+		
+		emanager.getTransaction().commit();
+		}
+		catch (PersistenceException e) {
+			e.getMessage();
+		}
+		
+		emanager.close();
+		emfactory.close();
+
+	}
 
 	/**
 	 * Gets a value from a private variable to promote more secure code
@@ -250,6 +367,14 @@ public class Album {
 	}
 	
 	//*****************Setters start here****************
+	/**
+     * Sets a value in a private variable to promote more secure code
+     * @param albumID - ID of the album for the database
+     */
+	public void setAlbumID(String albumID) {
+		this.albumID = albumID;
+	}
+
 	/**
      * Sets a value in a private variable to promote more secure code
      * @param title - title of the album

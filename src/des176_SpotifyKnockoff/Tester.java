@@ -21,8 +21,6 @@ public class Tester {
 		//Map<String, Song> songList = new Hashtable<String, Song>();
 
 		
-		
-		
 		// Vector<Vector<Song>> songTable = new Vector <>();
 		 
 		//System.out.println(s1);

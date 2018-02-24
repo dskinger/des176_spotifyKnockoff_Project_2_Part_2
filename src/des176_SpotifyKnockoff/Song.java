@@ -1,19 +1,38 @@
 package des176_SpotifyKnockoff;
 
-import java.util.Map;
+import javax.persistence.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+@Entity
+@Table (name = "song")
+
 public class Song {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	
+	@Column (name = "song_id")
 	private String songID;
+	
+	@Column (name = "title")
 	private String title;
+	
+	@Column (name = "length")
 	private double length;
+	
+	@Column (name = "file_path")
 	private String filePath;
+	
+	@Column (name = "release_date")
 	private String releaseDate;
+	
+	@Column (name = "record_date")
 	private String recordDate;
+	
+	@Transient
 	Map<String, Artist> songArtists;
 	
     /**
@@ -79,6 +98,10 @@ public class Song {
 			e.printStackTrace();
 		}
 				
+	}
+	
+	public Song () {
+		super();
 	}
 	
     /**
@@ -169,6 +192,77 @@ public class Song {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+	}
+	
+	/**
+     * Creates a song object using an existing song object
+     * @param song - song object from the database
+     */
+	public static void createSong(Song s) {
+		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory("des176_SpotifyKnockoff");
+	
+		EntityManager emanager = emfactory.createEntityManager();
+		
+		emanager.getTransaction().begin();
+		
+		s.setSongID(UUID.randomUUID().toString());
+		s.setTitle("This song is not in the database");
+		s.setLength(10);
+		s.setRecordDate("2018-02-13");
+		s.setReleaseDate("2018-02-14");
+		s.setFilePath("");
+		
+		emanager.persist(s);
+		emanager.getTransaction().commit();
+		
+		emanager.close();
+		emfactory.close();
+	}
+	
+	/**
+     * Updates a song using the song object to find the songID
+     * @param song - song object from the database
+     */
+	public static void updateSong(Song song) {
+		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory("des176_SpotifyKnockoff");
+		
+		EntityManager emanager = emfactory.createEntityManager();
+		
+		emanager.getTransaction().begin();
+		
+		Song s = emanager.find(Song.class, song.getSongID());
+		
+		s.setTitle("This song IS in the database");
+		s.setFilePath("/var/www/html/song.mp3");
+		
+		emanager.persist(s);
+		emanager.getTransaction().commit();
+		
+		emanager.close();
+		emfactory.close();
+
+	}
+	
+	/**
+     * Deletes a song using the song object to find the songID
+     * @param song - song object from the database
+     */
+	public static void deleteSong(Song song) {
+		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory("des176_SpotifyKnockoff");
+		
+		EntityManager emanager = emfactory.createEntityManager();
+		
+		emanager.getTransaction().begin();
+		
+		Song s = emanager.find(Song.class, song.getSongID());
+		
+		emanager.remove(s);
+		
+		emanager.getTransaction().commit();
+		
+		emanager.close();
+		emfactory.close();
+
 	}
 	
     /**
@@ -273,6 +367,15 @@ public class Song {
      */
 	public void setSongArtists(Map<String, Artist> songArtists) {
 		this.songArtists = songArtists;
+	}
+
+	/**
+     * Sets a value in a private variable to promote more secure code
+     * @param songID - ID of the song for the database
+     */
+	public void setSongID(String songID) {
+		this.songID = songID;
+		
 	}
 	
 /*

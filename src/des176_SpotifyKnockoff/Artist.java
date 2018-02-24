@@ -6,11 +6,28 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import javax.persistence.*;
+
+@Entity
+@Table (name = "artist")
+
 public class Artist {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	
+	@Column (name = "artist_id")
 	private String artistID;
+	
+	@Column (name = "first_name")
 	private String firstName;
+	
+	@Column (name = "last_name")
 	private String lastName;
+	
+	@Column (name = "band_name")
 	private String bandName;
+	
+	@Column (name = "bio")
 	private String bio;
 	
     /**
@@ -74,6 +91,10 @@ public class Artist {
 				
 	}
 	
+	public Artist () {
+		super();
+	}
+	
     /**
      * Deletes an artist from the database using artistID as the key
      * @param artistID - unique identifier for an artist object for the database
@@ -93,6 +114,75 @@ public class Artist {
 			e.printStackTrace();
 		}
 		//Set the db to null to destroy it
+	}
+	
+	/**
+     * Creates a artist object using an existing artist object
+     * @param artist - artist object from the database
+     */
+	public static void createArtist(Artist artist) {
+		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory("des176_SpotifyKnockoff");
+	
+		EntityManager emanager = emfactory.createEntityManager();
+		
+		emanager.getTransaction().begin();
+		
+		artist.setArtistID(UUID.randomUUID().toString());
+		artist.setFirstName("A dude");
+		artist.setLastName("The last name of a dude");
+		artist.setBandName("The dudes");
+		artist.setBio("A description that talks about stuff");
+		
+		emanager.persist(artist);
+		emanager.getTransaction().commit();
+		
+		emanager.close();
+		emfactory.close();
+	}
+
+	/**
+     * Updates a artist using the artist object to find the artistID
+     * @param artist - artist object from the database
+     */
+	public static void updateArtist(Artist artist) {
+		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory("des176_SpotifyKnockoff");
+		
+		EntityManager emanager = emfactory.createEntityManager();
+		
+		emanager.getTransaction().begin();
+		
+		Artist s = emanager.find(Artist.class, artist.getArtistID());
+		
+		s.setBio("This Artist IS in the database");
+		s.setBandName("/var/www/html/Artist.mp3");
+		
+		emanager.persist(s);
+		emanager.getTransaction().commit();
+		
+		emanager.close();
+		emfactory.close();
+
+	}
+	
+	/**
+     * Deletes a artist using the artist object to find the artistID
+     * @param artist - artist object from the database
+     */
+	public static void deleteArtist(Artist artist) {
+		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory("des176_SpotifyKnockoff");
+		
+		EntityManager emanager = emfactory.createEntityManager();
+		
+		emanager.getTransaction().begin();
+		
+		Artist s = emanager.find(Artist.class, artist.getArtistID());
+		
+		emanager.remove(s);
+		
+		emanager.getTransaction().commit();
+		
+		emanager.close();
+		emfactory.close();
 	}
 	
 	// Getters to grab the information about the object
@@ -137,6 +227,14 @@ public class Artist {
 	}
 
 	// Setters to set the information about the object
+	/**
+     * Sets a value in a private variable to promote more secure code
+     * @param artistID - ID of the artist for the database
+     */
+	public void setArtistID(String artistID) {
+		this.artistID = artistID;
+	}
+	
 	/**
      * Sets a value in a private variable to promote more secure code
      * @param firstName - first name of the artist
